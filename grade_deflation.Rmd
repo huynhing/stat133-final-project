@@ -20,7 +20,7 @@ includeSourceDocuments()
 
 ### Import CSVs as Tables and Normalize Them
 ```{r}
-base_url <- "https://raw.githubusercontent.com/huynhing/stat133-final-project/master/raw/"
+base_url <- "https://raw.githubusercontent.com/huynhing/stat133-final-project/data/raw/"
 
 # Read in files
 spring_2009 <- read.csv(paste(base_url, "spring_2009.csv", sep=""), skip=2, header=TRUE, check.names=FALSE)
