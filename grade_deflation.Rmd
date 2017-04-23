@@ -58,8 +58,11 @@ fall_2015[is.na(fall_2015)] <- 0
 spring_2016[is.na(spring_2016)] <- 0
 fall_2016[is.na(fall_2016)] <- 0
 
-# Select Only The Important Columns
-
+# Select Only The Important Columns and Normalize the Column Names
+# Department Abbreviations, Course Number, A+, A, A-, B+, B, B-, C+, C, C-, D+, D, D-, F
 
 # Remove Non Alphabetic Characters From Department Abbreviations
+
+# Mutate Each Datatable To Add "Number of Grades" Column
+# Number of Grades = sum(A+ ... F columns)
 ```
