@@ -21,6 +21,7 @@ includeSourceDocuments()
 ### Import CSVs as Tables and Normalize Them
 ```{r}
 base_url <- "https://raw.githubusercontent.com/huynhing/stat133-final-project/data/raw/"
+base_url <- "~/berkeley-time/berkeleytime/data/service/reader/csv/grades/raw/"
 
 # Read in files
 spring_2009 <- read.csv(paste(base_url, "spring_2009.csv", sep=""), skip=2, header=TRUE, check.names=FALSE)
@@ -150,7 +151,221 @@ fall_2016 <- fall_2016 %>%
   mutate(num_grades = rowSums(.[3:15]), department=gsub("[^0-9A-Za-z]", "", department))
 ```
 
-### Data Wrangling
+### Helpful Functions and Variables
 ```{r}
+all_semesters <- list(spring_2009, fall_2009, spring_2010, fall_2010, spring_2011, fall_2011, spring_2012, fall_2012, spring_2013, fall_2013, spring_2014, fall_2014, spring_2015, fall_2015, spring_2016, fall_2016)
 
+spring_semesters <- list(spring_2009, spring_2010, spring_2011, spring_2012, spring_2013, spring_2014, spring_2015, spring_2016)
+fall_semesters <- list(fall_2009, fall_2010, fall_2011, fall_2012, fall_2013, fall_2014, fall_2015, fall_2016)
+
+semester_names <- c("spring_2009", "fall_2009", "spring_2010", "fall_2010", "spring_2011", "fall_2011", "spring_2012", "fall_2012", "spring_2013", "fall_2013", "spring_2014", "fall_2014", "spring_2015", "fall_2015", "spring_2016", "fall_2016")
+
+shorter_semester_names <- c("s_09", "f_09", "s_10", "f_10", "s_11", "f_11", "s_12", "f_12", "s_13", "f_13", "s_14", "f_14", "s_15", "f_15", "s_16", "f_16")
+
+year <- c(2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016)
+
+calc_semester_average_gpa <- function(semester) {
+  average_gpa <- semester %>%
+     summarize(total_a_plus=sum(`A+`), total_a=sum(A), total_a_minus=sum(`A-`), 
+            total_b_plus=sum(`B+`), total_b=sum(B), total_b_minus=sum(`B-`), 
+            total_c_plus=sum(`C+`), total_c=sum(C), total_c_minus=sum(`C-`), 
+            total_d_plus=sum(`D+`), total_d=sum(D), total_d_minus=sum(`D-`), 
+            total_f=sum(F)) %>%
+  summarize(avg_gpa=
+              (4 * total_a_plus +
+              4 * total_a + 
+              3.7 * total_a_minus +
+              3.3 * total_b_plus +
+              3 * total_b +
+              2.7 * total_b_minus + 
+              2.3 * total_c_plus +
+              2 * total_c +
+              1.7 * total_c_minus +
+              1.3 * total_d_plus +
+              1.0 * total_d +
+              0.7 * total_d_minus) /
+              (total_a_plus +
+              total_a +
+              total_a_minus +
+              total_b_plus +
+              total_b +
+              total_b_minus +
+              total_c_plus +
+              total_c +
+              total_c_minus +
+              total_d_plus +
+              total_d +
+              total_d_minus +
+              total_f)
+              )
+  return(average_gpa[1, 1])
+}
+calc_all_department_semester_average_gpa <- function(semester) {
+  average_gpa <- semester %>%
+    group_by(department) %>%
+    summarize(total_a_plus=sum(`A+`), total_a=sum(A), total_a_minus=sum(`A-`), 
+            total_b_plus=sum(`B+`), total_b=sum(B), total_b_minus=sum(`B-`), 
+            total_c_plus=sum(`C+`), total_c=sum(C), total_c_minus=sum(`C-`), 
+            total_d_plus=sum(`D+`), total_d=sum(D), total_d_minus=sum(`D-`), 
+            total_f=sum(F)) %>%
+    mutate(avg_gpa=
+              (4 * total_a_plus +
+              4 * total_a + 
+              3.7 * total_a_minus +
+              3.3 * total_b_plus +
+              3 * total_b +
+              2.7 * total_b_minus + 
+              2.3 * total_c_plus +
+              2 * total_c +
+              1.7 * total_c_minus +
+              1.3 * total_d_plus +
+              1.0 * total_d +
+              0.7 * total_d_minus) /
+              (total_a_plus +
+              total_a +
+              total_a_minus +
+              total_b_plus +
+              total_b +
+              total_b_minus +
+              total_c_plus +
+              total_c +
+              total_c_minus +
+              total_d_plus +
+              total_d +
+              total_d_minus +
+              total_f)
+              ) %>%
+    select(department, avg_gpa)
+  return(average_gpa)
+}
+
+calc_department_semester_average_gpa <- function(semester, dpt) {
+  return(filter_departments(calc_all_department_semester_average_gpa(semester), dpt))
+}
+filter_classes <- function(semester, dpt, number) {
+  filtered <- semester %>%
+    filter(department == dpt) %>%
+    filter(grepl(number, course_number))
+  return(filtered)
+}
+filter_departments <- function(semester, dpt) {
+  filtered <- semester %>%
+    filter(department == dpt) %>%
+    select(avg_gpa)
+  return(filtered)
+}
+
+avg_gpa_all <- unlist(lapply(all_semesters, calc_semester_average_gpa))
+avg_gpa_spring <- unlist(lapply(spring_semesters, calc_semester_average_gpa))
+avg_gpa_fall <- unlist(lapply(fall_semesters, calc_semester_average_gpa))
+
+avg_gpa_dept_all <- lapply(all_semesters, calc_all_department_semester_average_gpa)
+```
+
+### GPA Change From Spring 2009 to Fall 2016
+```{r fig.width=6, fig.height=4}
+data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=avg_gpa_all) %>%
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point()
+```
+
+### Spring vs. Fall GPAs
+```{r fig.width=6, fig.height=4}
+data.frame(year, spring=avg_gpa_spring, fall=avg_gpa_fall) %>%
+  tidyr::gather(semester, average_gpa, spring, fall) %>%
+  ggplot(aes(x=year, y=average_gpa, color=semester)) + geom_point()
+```
+
+### Lowest 10 GPAs Per Semester
+```{r}
+for (i in 1:length(semester_names)) {
+  print(semester_names[i])
+  dept <- avg_gpa_dept_all[[i]]
+  dept <- dept[order(dept$avg_gpa),]
+  print(dept[1:10,])
+  print("----------------------------")
+}
+```
+
+### Top 10 GPAs Per Semester
+```{r}
+for (i in 1:length(semester_names)) {
+  print(semester_names[i])
+  dept <- avg_gpa_dept_all[[i]]
+  dept <- dept[order(-dept$avg_gpa),]
+  print(dept[1:10,])
+  print("----------------------------")
+}
+```
+
+
+### GPA Change For Statistics Department
+```{r}
+stat_avg_gpa <- unname(unlist(lapply(all_semesters, calc_department_semester_average_gpa, "STAT")))
+
+data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=stat_avg_gpa) %>%
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point()
+```
+
+### GPA Change For Computer Science Department
+```{r}
+cs_avg_gpa <- unname(unlist(lapply(all_semesters, calc_department_semester_average_gpa, "COMPSCI")))
+
+data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=cs_avg_gpa) %>%
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point()
+```
+
+### GPA Change For Math Department
+```{r}
+math_avg_gpa <- unname(unlist(lapply(all_semesters, calc_department_semester_average_gpa, "MATH")))
+
+data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=math_avg_gpa) %>%
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point()
+```
+
+### GPA Change For Business Department
+```{r}
+ugba_avg_gpa <- unname(unlist(lapply(all_semesters, calc_department_semester_average_gpa, "UGBA")))
+
+data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=ugba_avg_gpa) %>%
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point()
+```
+### GPA Change For Media Studies Department
+```{r}
+ms_avg_gpa <- unname(unlist(lapply(all_semesters, calc_department_semester_average_gpa, "MEDIAST")))
+
+data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=ms_avg_gpa) %>%
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point()
+```
+
+
+### GPA Change For Stat 133
+```{r fig.width=6, fig.height=4}
+stat_133_avg_gpa <- unname(unlist(lapply(lapply(all_semesters, filter_classes, "STAT", "133"), calc_semester_average_gpa)))
+
+data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=stat_133_avg_gpa) %>%
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point()
+```
+
+### GPA Change For UGBA 10
+```{r fig.width=6, fig.height=4}
+ugba_10_avg_gpa <- unname(unlist(lapply(lapply(all_semesters, filter_classes, "UGBA", "10"), calc_semester_average_gpa)))
+
+data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=ugba_10_avg_gpa) %>%
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point()
+```
+
+### GPA Change For MATH 1A
+```{r fig.width=6, fig.height=4}
+math_1a_avg_gpa <- unname(unlist(lapply(lapply(all_semesters, filter_classes, "MATH", "1A"), calc_semester_average_gpa)))
+
+data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=math_1a_avg_gpa) %>%
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point()
+```
+
+### GPA Change For MATH 16A
+```{r fig.width=6, fig.height=4}
+math_16a_avg_gpa <- unname(unlist(lapply(lapply(all_semesters, filter_classes, "MATH", "16A"), calc_semester_average_gpa)))
+
+data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=math_16a_avg_gpa) %>%
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point()
 ```
