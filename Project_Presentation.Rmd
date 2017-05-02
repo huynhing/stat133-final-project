@@ -46,8 +46,8 @@ knitr::opts_chunk$set(echo = FALSE)
 
 <img src="graphs.jpg" height="500px" />
 
-## <span style = "color:green">Highest and Lowest GPAs by Department (Spring 2016)</span>
+## <span style = "color:green">Changes Through the Semesters</span>
 
-<img src="tables.jpg" height="600px" />
+<img src="graphs2.jpg" height="500px" />
 
 
