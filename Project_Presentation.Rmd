@@ -1,0 +1,53 @@
+---
+title: "GPA Deflation is Real"
+author: "Eric Huynh, Sophia Li, Allison Nguyen, Andy Phan"
+output:
+  slidy_presentation:
+    highlight: tango
+    increment: yes
+  beamer_presentation:
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## <span style = "color:purple">GPA Deflation: Is It Real? </span>
+
+<span style = "color:purple">Key Questions</span>
+
+- Does GPA deflation exist at Berkeley?
+
+- If so, which deparments have the highest GPA deflation?
+
+- Is there a difference between Fall and Spring semester GPAs?
+
+- Which departments have the highest GPA?
+
+- Which departments have the lowest GPA?
+
+<span style = "color:purple">Data Set</span>
+
+- BerkeleyTime
+
+- Spring 2009 - Fall 2016
+
+<span style = "color:purple">Methods</span>
+
+- <ol class = 'outline'>
+  <li> Material Not Related to Class
+  <li> Material Related to Class
+    <ol>
+    data wrangling, ggplot, linear regression modelling, regex
+  </li>
+
+## <span style = "color:blue">Looking into the Statistics Department</span>
+
+<img src="graphs.jpg" height="500px" />
+
+## <span style = "color:green">Highest and Lowest GPAs by Department (Spring 2016)</span>
+
+<img src="tables.jpg" height="600px" />
+
+
