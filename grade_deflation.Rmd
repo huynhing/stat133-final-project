@@ -259,7 +259,8 @@ calc_all_department_semester_average_gpa <- function(semester) {
 }
 
 calc_department_semester_average_gpa <- function(semester, dpt) {
-  ret_val <- filter_departments(calc_all_department_semester_average_gpa(semester), dpt)
+  ret_val <- filter_departments(calc_all_department_semester_average_gpa(semester), dpt) %>%
+    select(avg_gpa)
   if (nrow(ret_val) == 0) {
     return(NA)
   } else {
@@ -276,8 +277,7 @@ filter_classes <- function(semester, dpt, number) {
 
 filter_departments <- function(semester, dpt) {
   filtered <- semester %>%
-    filter(department == dpt) %>%
-    select(avg_gpa)
+    filter(department == dpt)
   return(filtered)
 }
 
@@ -604,4 +604,69 @@ df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_seme
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=math_16a_avg_gpa) %>%
   ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+```
+
+### Density Plot of All Grades From Spring 2009 - Fall 2016
+```{r fig.width=10, fig.height=4}
+all_grades <- rbind(spring_2009, fall_2009, spring_2010, fall_2010, spring_2011, fall_2011, spring_2012, fall_2012, spring_2013, fall_2013, spring_2014, fall_2014, spring_2015, fall_2015, spring_2016, fall_2016)
+
+grade_names <- c("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F")
+total_num_grades <- all_grades %>%
+  summarize(total_a_plus=sum(`A+`), total_a=sum(A), total_a_minus=sum(`A-`), 
+          total_b_plus=sum(`B+`), total_b=sum(B), total_b_minus=sum(`B-`), 
+          total_c_plus=sum(`C+`), total_c=sum(C), total_c_minus=sum(`C-`), 
+          total_d_plus=sum(`D+`), total_d=sum(D), total_d_minus=sum(`D-`), 
+          total_f=sum(F))
+colnames(total_num_grades) <- grade_names
+
+a_plus <- rep("A+", total_num_grades[["A+"]])
+a <- rep("A", total_num_grades[["A"]])
+a_minus <- rep("A-", total_num_grades[["A-"]])
+b_plus <- rep("B+", total_num_grades[["B+"]])
+b <- rep("B", total_num_grades[["B"]])
+b_minus <- rep("B-", total_num_grades[["B-"]])
+c_plus <- rep("C+", total_num_grades[["C+"]])
+c <- rep("C", total_num_grades[["C"]])
+c_minus <- rep("C-", total_num_grades[["C-"]])
+d_plus <- rep("D+", total_num_grades[["D+"]])
+d <- rep("D", total_num_grades[["D"]])
+d_minus <- rep("D-", total_num_grades[["D-"]])
+f <- rep("F", total_num_grades[["F"]])
+
+all_grades <- data.frame(grade=c(a_plus, a, a_minus, b_plus, b, b_minus, c_plus, c, c_minus, d_plus, d, d_minus, f))
+
+ggplot(all_grades, aes(grade, color=grade, fill=grade)) + geom_density(alpha=0.1) + labs(title="Density of All Grades From Spring 2009 - Fall 2016")
+```
+
+### Density Plot of All STAT Grades From Spring 2009 - Fall 2016
+```{r fig.width=10, fig.height=4}
+all_grades <- rbind(spring_2009, fall_2009, spring_2010, fall_2010, spring_2011, fall_2011, spring_2012, fall_2012, spring_2013, fall_2013, spring_2014, fall_2014, spring_2015, fall_2015, spring_2016, fall_2016)
+
+grade_names <- c("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F")
+total_num_grades <- all_grades %>%
+  filter(department == "STAT") %>%
+  summarize(total_a_plus=sum(`A+`), total_a=sum(A), total_a_minus=sum(`A-`), 
+          total_b_plus=sum(`B+`), total_b=sum(B), total_b_minus=sum(`B-`), 
+          total_c_plus=sum(`C+`), total_c=sum(C), total_c_minus=sum(`C-`), 
+          total_d_plus=sum(`D+`), total_d=sum(D), total_d_minus=sum(`D-`), 
+          total_f=sum(F))
+colnames(total_num_grades) <- grade_names
+
+a_plus <- rep("A+", total_num_grades[["A+"]])
+a <- rep("A", total_num_grades[["A"]])
+a_minus <- rep("A-", total_num_grades[["A-"]])
+b_plus <- rep("B+", total_num_grades[["B+"]])
+b <- rep("B", total_num_grades[["B"]])
+b_minus <- rep("B-", total_num_grades[["B-"]])
+c_plus <- rep("C+", total_num_grades[["C+"]])
+c <- rep("C", total_num_grades[["C"]])
+c_minus <- rep("C-", total_num_grades[["C-"]])
+d_plus <- rep("D+", total_num_grades[["D+"]])
+d <- rep("D", total_num_grades[["D"]])
+d_minus <- rep("D-", total_num_grades[["D-"]])
+f <- rep("F", total_num_grades[["F"]])
+
+all_grades <- data.frame(grade=c(a_plus, a, a_minus, b_plus, b, b_minus, c_plus, c, c_minus, d_plus, d, d_minus, f))
+
+ggplot(all_grades, aes(grade, color=grade, fill=grade)) + geom_density(alpha=0.1) + labs(title="Density of All Stat Grades From Spring 2009 - Fall 2016")
 ```
