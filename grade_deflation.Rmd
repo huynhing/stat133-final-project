@@ -259,8 +259,7 @@ calc_all_department_semester_average_gpa <- function(semester) {
 }
 
 calc_department_semester_average_gpa <- function(semester, dpt) {
-  ret_val <- filter_departments(calc_all_department_semester_average_gpa(semester), dpt) %>%
-    select(avg_gpa)
+  ret_val <- filter_departments(calc_all_department_semester_average_gpa(semester), dpt)
   if (nrow(ret_val) == 0) {
     return(NA)
   } else {
@@ -277,7 +276,8 @@ filter_classes <- function(semester, dpt, number) {
 
 filter_departments <- function(semester, dpt) {
   filtered <- semester %>%
-    filter(department == dpt)
+    filter(department == dpt) %>%
+    select(avg_gpa)
   return(filtered)
 }
 
@@ -303,23 +303,26 @@ avg_gpa_dept_upper <- lapply(all_semesters_upper_div, calc_all_department_semest
 ```{r fig.width=6, fig.height=4}
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=avg_gpa_all)
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=avg_gpa_all) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method='lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method='lm', data = df) +
+  labs(title = "GPA Change From Spring 2009 to Fall 2016", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change From Spring 2009 to Fall 2016 (Lower Division)
+### GPA Change From Spring 2009 to Fall 2016 (Lower Div)
 ```{r fig.width=6, fig.height=4}
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=avg_gpa_lower_div)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=avg_gpa_lower_div) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method='lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method='lm', data = df) +
+  labs(title = "GPA Change From Spring 2009 to Fall 2016 (Lower Division)", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change From Spring 2009 to Fall 2016 (Upper Division)
+### GPA Change From Spring 2009 to Fall 2016 (Upper Div)
 ```{r fig.width=6, fig.height=4}
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=avg_gpa_upper_div)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=avg_gpa_upper_div) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method='lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method='lm', data = df) +
+  labs(title = "GPA Change From Spring 2009 to Fall 2016 (Upper Division)", y = "Average GPA", x = "Semester")
 ```
 
 ### Spring vs. Fall GPAs
@@ -327,13 +330,15 @@ data.frame(semester=factor(shorter_semester_names, shorter_semester_names), aver
 
 data.frame(year, spring=avg_gpa_spring, fall=avg_gpa_fall) %>%
   tidyr::gather(semester, average_gpa, spring, fall) %>%
-  ggplot(aes(x=year, y=average_gpa, color=semester)) + geom_point() + geom_smooth(aes(colour=factor(semester)),method="lm",se = FALSE)
+  ggplot(aes(x=year, y=average_gpa, color=semester)) + geom_point() + geom_smooth(aes(colour=factor(semester)),method="lm",se = FALSE) +
+  labs(title = "Spring vs. Fall GPAs", y = "Average GPA", x = "Year")
 ```
 
 ### Lower Div vs. Upper Div GPAs
 ```{r fig.width=6, fig.height=4}
 data.frame(year, lower_div=avg_gpa_lower_div, upper_div=avg_gpa_upper_div) %>% tidyr::gather(division, average_gpa, lower_div, upper_div) %>%
-  ggplot(aes(x=year, y=average_gpa, color=division)) + geom_point() + geom_smooth(aes(colour=factor(division)),method="lm",se = FALSE)
+  ggplot(aes(x=year, y=average_gpa, color=division)) + geom_point() + geom_smooth(aes(colour=factor(division)),method="lm",se = FALSE) +
+  labs(title = "Lower Division vs. Upper Division GPAs", y = "Average GPA", x = "Year")
 ```
 
 ### Lowest 10 GPAs Per Semester
@@ -406,7 +411,7 @@ gpa_difference_dept <- na.omit(gpa_difference_dept)
 gpa_difference_dept$gpa_difference <- gpa_difference_dept$avg_gpa.y - gpa_difference_dept$avg_gpa.x
 colnames(gpa_difference_dept)[2] <- "first semester avg gpa"
 colnames(gpa_difference_dept)[3] <- "last semester avg gpa"
-gpa_difference_dept <- gpa_difference_dept[order(gpa_difference_dept$gpa_difference),]
+gpa_difference_dept <- gpa_difference_dept[order(-gpa_difference_dept$gpa_difference),]
 print(gpa_difference_dept[1:10, ])
 ```
 
@@ -433,25 +438,28 @@ print(gpa_difference_dept[1:10, ])
 stat_avg_gpa <- unname(unlist(lapply(all_semesters, calc_department_semester_average_gpa, "STAT")))
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=stat_avg_gpa)
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=stat_avg_gpa) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)+
+  labs(title = "GPA Change For Statistics Department", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change For Statistics Department Lower Div
+### GPA Change For Statistics Department (Lower Div)
 ```{r}
 stat_avg_gpa <- unname(unlist(lapply(all_semesters_lower_div, calc_department_semester_average_gpa, "STAT")))
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=stat_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=stat_avg_gpa) %>%
-  ggplot(aes(x=semester, y=stat_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=stat_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df) +
+  labs(title = "GPA Change For Statistics Department (Lower Div)", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change For Statistics Department Upper Div
+### GPA Change For Statistics Department (Upper Div)
 ```{r}
 stat_avg_gpa <- unname(unlist(lapply(all_semesters_upper_div, calc_department_semester_average_gpa, "STAT")))
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=stat_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=stat_avg_gpa) %>%
-  ggplot(aes(x=semester, y=stat_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=stat_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)+
+  labs(title = "GPA Change For Statistics Department (Upper Div)", y = "Average GPA", x = "Semester")
 ```
 
 ### GPA Change For Computer Science Department
@@ -461,25 +469,28 @@ cs_avg_gpa <- unname(unlist(lapply(all_semesters, calc_department_semester_avera
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=cs_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=cs_avg_gpa) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)+
+  labs(title = "GPA Change For Computer Science Department", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change For Computer Science Department Lower Div
+### GPA Change For Computer Science Department (Lower Div)
 ```{r}
 cs_avg_gpa <- unname(unlist(lapply(all_semesters_lower_div, calc_department_semester_average_gpa, "COMPSCI")))
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=cs_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=cs_avg_gpa) %>%
-  ggplot(aes(x=semester, y=cs_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=cs_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df) +
+  labs(title = "GPA Change For Computer Science Dept. (Lower Div)", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change For Computer Science Department Upper Div
+### GPA Change For Computer Science Department (Upper Div)
 ```{r}
 cs_avg_gpa <- unname(unlist(lapply(all_semesters_upper_div, calc_department_semester_average_gpa, "COMPSCI")))
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=cs_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=cs_avg_gpa) %>%
-  ggplot(aes(x=semester, y=cs_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=cs_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df) +
+  labs(title = "GPA Change For Computer Science Dept. (Upper)", y = "Average GPA", x = "Semester")
 ```
 
 ### GPA Change For Math Department
@@ -489,25 +500,28 @@ math_avg_gpa <- unname(unlist(lapply(all_semesters, calc_department_semester_ave
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=math_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=math_avg_gpa) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df) +
+  labs(title = "GPA Change For Math Department", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change For Math Department Lower Div
+### GPA Change For Math Department (Lower Div)
 ```{r}
 math_avg_gpa <- unname(unlist(lapply(all_semesters_lower_div, calc_department_semester_average_gpa, "MATH")))
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=math_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=math_avg_gpa) %>%
-  ggplot(aes(x=semester, y=math_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=math_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df) +
+  labs(title = "GPA Change For Math Department (Lower Division)", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change For Math Department Upper Div
+### GPA Change For Math Department (Upper Div)
 ```{r}
 math_avg_gpa <- unname(unlist(lapply(all_semesters_upper_div, calc_department_semester_average_gpa, "MATH")))
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=math_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=math_avg_gpa) %>%
-  ggplot(aes(x=semester, y=math_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=math_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df) +
+  labs(title = "GPA Change For Math Department (Upper Division)", y = "Average GPA", x = "Semester")
 ```
 
 ### GPA Change For Business Department
@@ -517,25 +531,28 @@ ugba_avg_gpa <- unname(unlist(lapply(all_semesters, calc_department_semester_ave
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=ugba_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=ugba_avg_gpa) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df) +
+  labs(title = "GPA Change For Business Department", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change For Business Department Lower Div
+### GPA Change For Business Department (Lower Div)
 ```{r}
 business_avg_gpa <- unname(unlist(lapply(all_semesters_lower_div, calc_department_semester_average_gpa, "UGBA")))
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=business_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=business_avg_gpa) %>%
-  ggplot(aes(x=semester, y=business_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=business_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df) +
+  labs(title = "GPA Change For Business Department (Lower Div)", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change For Business Department Upper Div
+### GPA Change For Business Department (Upper Div)
 ```{r}
 business_avg_gpa <- unname(unlist(lapply(all_semesters_upper_div, calc_department_semester_average_gpa, "UGBA")))
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=business_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=business_avg_gpa) %>%
-  ggplot(aes(x=semester, y=business_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=business_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df) +
+  labs(title = "GPA Change For Business Department (Upper Div)", y = "Average GPA", x = "Semester")
 ```
 
 ### GPA Change For Media Studies Department
@@ -545,35 +562,39 @@ ms_avg_gpa <- unname(unlist(lapply(all_semesters, calc_department_semester_avera
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=ms_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=ms_avg_gpa) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df) +
+  labs(title = "GPA Change For Media Studies Department", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change For Media Studies Lower Div
+### GPA Change For Media Studies Department (Lower Div)
 ```{r}
 ms_avg_gpa <- unname(unlist(lapply(all_semesters_lower_div, calc_department_semester_average_gpa, "MEDIAST")))
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=ms_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=ms_avg_gpa) %>%
-  ggplot(aes(x=semester, y=ms_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=ms_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)  +
+  labs(title = "GPA Change For Media Studies Dept. (Lower Div)", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change For Media Studies Upper Div
+### GPA Change For Media Studies Department (Upper Div)
 ```{r}
 ms_avg_gpa <- unname(unlist(lapply(all_semesters_upper_div, calc_department_semester_average_gpa, "MEDIAST")))
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=ms_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=ms_avg_gpa) %>%
-  ggplot(aes(x=semester, y=ms_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=ms_avg_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)  +
+  labs(title = "GPA Change For Media Studies Dept. (Upper Div)", y = "Average GPA", x = "Semester")
 ```
 
-### GPA Change For Stat 133
+### GPA Change For STAT 133
 ```{r fig.width=6, fig.height=4}
 stat_133_avg_gpa <- unname(unlist(lapply(lapply(all_semesters, filter_classes, "STAT", "133"), calc_semester_average_gpa)))
 
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=stat_133_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=stat_133_avg_gpa) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)+
+  labs(title = "GPA Change For STAT 133", y = "Average GPA", x = "Semester")
 ```
 
 ### GPA Change For UGBA 10
@@ -583,7 +604,8 @@ ugba_10_avg_gpa <- unname(unlist(lapply(lapply(all_semesters, filter_classes, "U
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=ugba_10_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=ugba_10_avg_gpa) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df) +
+  labs(title = "GPA Change For UGBA 10", y = "Average GPA", x = "Semester")
 ```
 
 ### GPA Change For MATH 1A
@@ -593,7 +615,8 @@ math_1a_avg_gpa <- unname(unlist(lapply(lapply(all_semesters, filter_classes, "M
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=math_1a_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=math_1a_avg_gpa) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)  +
+  labs(title = "GPA Change For MATH 1A", y = "Average GPA", x = "Semester")
 ```
 
 ### GPA Change For MATH 16A
@@ -603,7 +626,8 @@ math_16a_avg_gpa <- unname(unlist(lapply(lapply(all_semesters, filter_classes, "
 df <- data.frame(semester=as.numeric(factor(shorter_semester_names, shorter_semester_names)), average_gpa=math_16a_avg_gpa)
 
 data.frame(semester=factor(shorter_semester_names, shorter_semester_names), average_gpa=math_16a_avg_gpa) %>%
-  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)
+  ggplot(aes(x=semester, y=average_gpa)) + geom_point() + geom_smooth(method = 'lm', data = df)  +
+  labs(title = "GPA Change For MATH 16A", y = "Average GPA", x = "Semester")
 ```
 
 ### Density Plot of All Grades From Spring 2009 - Fall 2016
@@ -668,5 +692,5 @@ f <- rep("F", total_num_grades[["F"]])
 
 all_grades <- data.frame(grade=c(a_plus, a, a_minus, b_plus, b, b_minus, c_plus, c, c_minus, d_plus, d, d_minus, f))
 
-ggplot(all_grades, aes(grade, color=grade, fill=grade)) + geom_density(alpha=0.1) + labs(title="Density of All Stat Grades From Spring 2009 - Fall 2016")
+ggplot(all_grades, aes(grade, color=grade, fill=grade)) + geom_density(alpha=0.1) + labs(title="Density of All STAT Grades From Spring 2009 - Fall 2016")
 ```

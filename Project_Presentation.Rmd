@@ -42,9 +42,9 @@ knitr::opts_chunk$set(echo = FALSE)
     data wrangling, ggplot, linear regression modelling, regex
   </li>
 
-## <span style = "color:blue">Looking into the Statistics Department</span>
+## <span style = "color:blue">Density Plots of Letter Grades</span>
 
-<img src="graphs.jpg" height="500px" />
+<img src="density.jpg" height="500px" />
 
 ## <span style = "color:green">Changes Through the Semesters</span>
 
